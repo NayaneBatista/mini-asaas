@@ -80,13 +80,55 @@
             background-color: #0056b3;
         }
     </style>
+    <script>
+        function limpa_formulario_cep() {
+            document.getElementById('rua').value = "";
+            document.getElementById('bairro').value = "";
+            document.getElementById('cidade').value = "";
+        }
+
+        function meu_callback(conteudo) {
+            if (!("erro" in conteudo)) {
+                document.getElementById('rua').value = conteudo.logradouro;
+                document.getElementById('bairro').value = conteudo.bairro;
+                document.getElementById('cidade').value = conteudo.localidade;
+            } else {
+                limpa_formulario_cep();
+                alert("CEP não encontrado.");
+            }
+        }
+
+        function pesquisar_cep(valor) {
+            var cep = valor.replace(/\D/g, '');
+
+            if (cep != "") {
+                var validacep = /^[0-9]{8}$/;
+
+                if (validacep.test(cep)) {
+                    document.getElementById('rua').value = "...";
+                    document.getElementById('bairro').value = "...";
+                    document.getElementById('cidade').value = "...";
+
+                    var script = document.createElement('script');
+                    script.src = 'https://viacep.com.br/ws/' + cep + '/json/?callback=meu_callback';
+                    document.body.appendChild(script);
+                } else {
+                    limpa_formulario_cep();
+                    alert("Formato de CEP inválido.");
+                }
+            } else {
+                limpa_formulario_cep();
+            }
+        };
+    </script>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Cadastro de Cliente 📝</h2>
-        <p>Todos os campos são obrigatórios!</p>
-        <form id="cadastroForm">
-            <div class="form-group">
+<div class="container">
+    <h2>Cadastro de Cliente 📝</h2>
+    <p>Todos os campos são obrigatórios!</p>
+    <form class="formulario" method="post" action="${createLink(controller: 'cadastro', action:'enviar')}"> <!--Não consegui usar o g.form :(-->
+        <div class="form-group">
                 <label for="nome">Nome Completo:</label>
                 <input type="text" id="nome" name="nome" required placeholder="Digite seu nome completo">
             </div>
@@ -98,29 +140,28 @@
                 <label for="telefone">Telefone:</label>
                 <input type="tel" id="telefone" name="telefone" maxlength="15" required placeholder="Ex: 99 12345-6789">
             </div>
-            <div class="form-group">
-                <label for="cep">CEP:</label>
-                <input type="text" id="cep" name="cep" maxlength="8" required placeholder="Ex: 12345-678">
-            </div>
-            <div class="form-group">
-                <label for="endereco">Endereço:</label>
-                <input type="text" id="endereco" name="endereco" required placeholder="Digite seu endereço">
-            </div>
-            <div class="form-group">
+        <div class="form-group">
+            <label for="cep">CEP:</label>
+            <input name="cep" type="text" id="cep" value="" maxlength="9" required placeholder="Ex: 12345678" onblur="pesquisar_cep(this.value);">
+        </div>
+        <div class="form-group">
+            <label for="rua">Logradouro:</label>
+            <input name="rua" type="text" id="rua" size="60" required placeholder="Digite seu logradouro">
+        </div>
+        <div class="form-group">
                 <label for="numero">Número:</label>
-                <input type="text" id="numero" name="numero" required placeholder="Caso não tenha, informar S/N">
+                <input type="text" id="numero" name="numero" required placeholder="Caso não tenha, digite S/N no campo">
             </div>
-            <div class="form-group">
-                <label for="bairro">Bairro:</label>
-                <input type="text" id="bairro" name="bairro" required placeholder="Digite seu bairro">
-            </div>
-            <div class="form-group">
-                <label for="cidade">Cidade-UF:</label>
-                <input type="text" id="cidade" name="cidade" required placeholder="Ex: Maringá-PR">
-            </div>
-            <button type="submit">Enviar 🤍</button>
-        </form>
-    </div>
-    <!-- <script></script> -->
+        <div class="form-group">
+            <label for="bairro">Bairro:</label>
+            <input name="bairro" type="text" id="bairro" size="40" required placeholder="Digite seu bairro">
+        </div>
+        <div class="form-group">
+            <label for="cidade">Cidade:</label>
+            <input name="cidade" type="text" id="cidade" size="40" required placeholder="Digite sua cidade">
+        </div>
+        <button type="submit">Enviar 🤍</button>
+    </form>
+</div>
 </body>
 </html>
